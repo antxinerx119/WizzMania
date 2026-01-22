@@ -4,6 +4,9 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QList>
+#include <QMap>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "database.hpp"
 
 class Server : public QTcpServer {
@@ -20,8 +23,14 @@ private slots:
     void onDisconnected();
 
 private:
-    void broadcastMessage(const QString& message, QTcpSocket* sender);
+    void handleMessage(QTcpSocket* socket, const QJsonObject& json);
+    void handleLogin(QTcpSocket* socket, const QString& username, const QString& password);
+    void handleRegister(QTcpSocket* socket, const QString& username, const QString& password);
+    void sendResponse(QTcpSocket* socket, const QString& type, bool success, const QString& message);
+    void broadcastMessage(const QString& sender, const QString& message, QTcpSocket* senderSocket);
+
     QList<QTcpSocket*> m_clients;
+    QMap<QTcpSocket*, QString> m_clientUsernames;
     Database m_db;
 };
 
