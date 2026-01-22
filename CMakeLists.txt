@@ -6,12 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configuration de Qt 6
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Sql)
 
 qt_standard_project_setup()
 
 set(PROJECT_SOURCES
     main.cpp
+    server.cpp
+    server.hpp
+    database.hpp
 )
 
 if(APPLE)
@@ -28,6 +31,7 @@ target_link_libraries(WizzMania PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Network
+    Qt6::Sql
 )
 
 install(TARGETS WizzMania
