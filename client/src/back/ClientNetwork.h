@@ -1,0 +1,56 @@
+#ifndef CLIENTNETWORK_H
+#define CLIENTNETWORK_H
+
+#include <QObject>
+#include <QTcpSocket>
+#include <QHostAddress>
+#include "Message.h"
+#include "Protocol.h"
+
+class ClientNetwork : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit ClientNetwork(QObject *parent = nullptr);
+    ~ClientNetwork();
+
+    void connectToServer(const QString &host, quint16 port);
+    void disconnect();
+
+    void sendMessage(const Message &message);
+    void sendLogin(const QString &username, const QString &password = "");
+    void sendChatMessage(const QString &content);
+    void sendWizz(const QString &targetUsername = "");
+
+    bool isConnected() const;
+    QString username() const { return m_username; }
+
+signals:
+    void connected();
+    void disconnected();
+    void loginSuccess(const QString &username);
+    void loginFailed(const QString &error);
+    void messageReceived(const Message &message);
+    void userJoined(const QString &username);
+    void userLeft(const QString &username);
+    void wizzReceived(const QString &fromUsername);
+    void error(const QString &errorMessage);
+
+private slots:
+    void onConnected();
+    void onDisconnected();
+    void onReadyRead();
+    void onError(QAbstractSocket::SocketError socketError);
+
+private:
+    void processData(const QByteArray &data);
+    bool readMessage(QByteArray &buffer);
+
+    QTcpSocket *m_socket;
+    QString m_username;
+    QByteArray m_buffer;
+    bool m_loggedIn;
+};
+
+#endif // CLIENTNETWORK_H

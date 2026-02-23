@@ -16,16 +16,23 @@ qt_standard_project_setup()
 
 set(PROJECT_SOURCES
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    messagewindow.h
-    messagewindow.cpp
-    loginwindow.h
-    loginwindow.cpp
-    server.cpp
-    server.hpp
-    database.hpp
+    client/src/front/mainwindow.cpp
+    client/src/front/mainwindow.h
+    client/src/front/mainwindow.ui
+    client/src/front/messagewindow.h
+    client/src/front/messagewindow.cpp
+    client/src/front/loginwindow.h
+    client/src/front/loginwindow.cpp
+    src/common/Protocol.h
+    src/common/Protocol.cpp
+    src/common/Message.h
+    src/common/Message.cpp
+    client/src/back/ClientNetwork.h
+    client/src/back/ClientNetwork.cpp
+    server/Server.h
+    server/Server.cpp
+    # server/server.hpp supprimé (obsolète)
+    server/database.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -69,3 +76,12 @@ install(TARGETS Mess
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Mess)
 endif()
+
+# Test executable for Message serialization
+add_executable(TestMessage tests/test_message.cpp
+    src/common/Protocol.h
+    src/common/Protocol.cpp
+    src/common/Message.h
+    src/common/Message.cpp
+)
+target_link_libraries(TestMessage PRIVATE Qt6::Core)

@@ -5,6 +5,8 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QListWidget>
+#include <QSplitter>
 
 MessageWindow::MessageWindow(QWidget *parent)
     : QWidget{parent}
@@ -19,21 +21,41 @@ MessageWindow::MessageWindow(QWidget *parent)
 
     sendButton = new QPushButton("Envoyer");
 
+    // User list widget
+    userListWidget = new QListWidget;
+    userListWidget->setMaximumWidth(200);
+
     auto inputLayout = new QHBoxLayout;
     inputLayout->addWidget(messageInput);
     inputLayout->addWidget(sendButton);
 
-    auto layout = new QVBoxLayout;
-    layout->addWidget(welcomeLabel);
-    layout->addWidget(messageDisplay);
-    layout->addLayout(inputLayout);
-    setLayout(layout);
+    auto chatLayout = new QVBoxLayout;
+    chatLayout->addWidget(welcomeLabel);
+    chatLayout->addWidget(messageDisplay);
+    chatLayout->addLayout(inputLayout);
+
+    // Splitter for chat and user list
+    auto splitter = new QSplitter(Qt::Horizontal);
+    auto chatWidget = new QWidget;
+    chatWidget->setLayout(chatLayout);
+    splitter->addWidget(chatWidget);
+    splitter->addWidget(userListWidget);
+    splitter->setSizes({600, 200});
+
+    auto mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(splitter);
+    setLayout(mainLayout);
 
     connect(sendButton, &QPushButton::clicked, this, &MessageWindow::sendMessage);
 }
 
 void MessageWindow::setUsername(const QString &name) {
     welcomeLabel->setText("Bienvenue " + name);
+}
+
+void MessageWindow::updateUserList(const QStringList &users) {
+    userListWidget->clear();
+    userListWidget->addItems(users);
 }
 
 void MessageWindow::sendMessage() {

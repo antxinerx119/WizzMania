@@ -8,18 +8,18 @@ LoginWindow::LoginWindow(QWidget *parent)
 {
     usernameInput = new QLineEdit;
     usernameInput->setPlaceholderText("Nom d'utilisateur");
-    //à ajouter une fois que vous pouvez integrer le mot de passe
-    //passwordInput->setPlaceholderText("Mot de passe");
+    passwordInput = new QLineEdit;
+    passwordInput->setPlaceholderText("Mot de passe");
+    passwordInput->setEchoMode(QLineEdit::Password);
 
     loginButton = new QPushButton("Se connecter");
     auto layout = new QVBoxLayout;
-    layout ->addWidget(usernameInput);
-    //layout ->addWidget(passwordInput);
-    layout ->addWidget(loginButton);
+    layout->addWidget(usernameInput);
+    layout->addWidget(passwordInput);
+    layout->addWidget(loginButton);
     setLayout(layout);
 
     connect(loginButton, &QPushButton::clicked, this, [this](){
-        emit loginRequested(usernameInput->text());
-        //emit loginRequested(usernameInput->text(), passwordInput->test());
+        emit loginRequested(usernameInput->text(), passwordInput->text());
     });
 }

@@ -1,9 +1,9 @@
-#include "mainwindow.h"
+#include "client/src/front/mainwindow.h"
 
 #include <QApplication>
 #include <QCoreApplication>
 #include <QStringList>
-#include "server.hpp"
+#include "server/Server.h"
 #include <iostream>
 
 int main(int argc, char *argv[])
