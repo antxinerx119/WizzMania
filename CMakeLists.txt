@@ -9,7 +9,30 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Configuration de Qt 6
+# Enable testing
+enable_testing()
+
+# Configuration de Qt 6 avec auto-detection
+if(NOT Qt6_DIR AND NOT CMAKE_PREFIX_PATH)
+    # Essayer les emplacements courants
+    set(QT6_POSSIBLE_PATHS
+        "C:/Qt/6.10.1/mingw_64"
+        "C:/Qt/6.10.1/msvc2022_64"
+        "C:/Qt/6.10.0/mingw_64"
+        "C:/Qt/6.9.0/mingw_64"
+        "C:/Tools/Qt/6.10.1/mingw_64"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Qt"
+    )
+    
+    foreach(QT_PATH ${QT6_POSSIBLE_PATHS})
+        if(EXISTS "${QT_PATH}/lib/cmake/Qt6")
+            set(CMAKE_PREFIX_PATH "${QT_PATH}" CACHE PATH "Qt6 prefix path")
+            message(STATUS "Qt6 trouvé à: ${QT_PATH}")
+            break()
+        endif()
+    endforeach()
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Sql)
 
 qt_standard_project_setup()
