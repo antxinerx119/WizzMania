@@ -1,14 +1,15 @@
-# Build directories
+# Build output
 build/
 build_local/
 cmake-build-*/
 
-# Qt Creator files
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
-*.moc
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Qt auto-generated files
 moc_*.cpp
 moc_*.h
 qrc_*.cpp
@@ -16,36 +17,16 @@ ui_*.h
 *.autosave
 .qtcreator/
 
-# CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-CMakeLists.txt.user
-
-# Compiled object files
+# Compiled binaries and objects
 *.o
 *.obj
 *.exe
 *.dll
-*.so
-*.dylib
 *.a
 *.lib
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
-Thumbs.db
-.DS_Store
-desktop.ini
-
-# Temporary files
-*.tmp
-*.log
-*.bak
+# Database generated at runtime
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

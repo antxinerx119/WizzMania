@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "loginwindow.h"
 #include "messagewindow.h"
-#include "src/common/Message.h"
+#include "Message.h"
 
 #include <QStackedWidget>
 #include <QMessageBox>

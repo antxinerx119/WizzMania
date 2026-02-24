@@ -6,8 +6,8 @@
 #include <QMap>
 #include <QSet>
 #include "database.hpp"
-#include "src/common/Message.h"
-#include "src/common/Protocol.h"
+#include "Message.h"
+#include "Protocol.h"
 
 class Server : public QObject {
     Q_OBJECT
