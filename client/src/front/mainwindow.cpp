@@ -132,6 +132,7 @@ void MainWindow::performWizzAnimation()
     group->addAnimation(finalAnim);
 
     m_wizzAnimation = group;
-    m_wizzAnimation->start(QAbstractAnimation::DeleteWhenDone);
+    connect(m_wizzAnimation, &QAbstractAnimation::finished, m_wizzAnimation, &QObject::deleteLater);
+    m_wizzAnimation->start();
 }
 

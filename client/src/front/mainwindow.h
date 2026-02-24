@@ -40,6 +40,6 @@ private:
     QString m_currentUsername;
     QString m_currentPassword;
     QPoint m_wizzOffset;
-    QPropertyAnimation *m_wizzAnimation;
+    QAbstractAnimation *m_wizzAnimation;
 };
 #endif // MAINWINDOW_H

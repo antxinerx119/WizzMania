@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     if (args.contains("--server")) {
         QCoreApplication app(argc, argv);
         Server server;
-        if (!server.startServer(1234)) {
+        if (!server.start(1234)) {
             std::cerr << "Failed to start server" << std::endl;
             return 1;
         }

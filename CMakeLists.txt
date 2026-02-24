@@ -58,7 +58,7 @@ set(PROJECT_SOURCES
     server/database.hpp
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(Qt6_FOUND)
     qt_add_executable(Mess
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
@@ -75,10 +75,17 @@ else()
     endif()
 endif()
 
+target_include_directories(Mess PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/client/src/back
+    ${CMAKE_CURRENT_SOURCE_DIR}/server
+)
+
 target_link_libraries(Mess PRIVATE Qt6::Widgets Qt6::Network Qt6::Sql)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
+if(Qt6_VERSION VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.Mess)
 endif()
 set_target_properties(Mess PROPERTIES
@@ -96,7 +103,7 @@ install(TARGETS Mess
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
+if(Qt6_FOUND)
     qt_finalize_executable(Mess)
 endif()
 

@@ -9,8 +9,7 @@ ClientNetwork::ClientNetwork(QObject *parent)
     connect(m_socket, &QTcpSocket::connected, this, &ClientNetwork::onConnected);
     connect(m_socket, &QTcpSocket::disconnected, this, &ClientNetwork::onDisconnected);
     connect(m_socket, &QTcpSocket::readyRead, this, &ClientNetwork::onReadyRead);
-    connect(m_socket, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error),
-            this, &ClientNetwork::onError);
+    connect(m_socket, &QTcpSocket::errorOccurred, this, &ClientNetwork::onError);
 }
 
 ClientNetwork::~ClientNetwork()

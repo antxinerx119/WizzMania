@@ -44,8 +44,7 @@ void Server::onNewConnection()
         
         connect(socket, &QTcpSocket::readyRead, this, &Server::onReadyRead);
         connect(socket, &QTcpSocket::disconnected, this, &Server::onDisconnected);
-        connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::error),
-                this, &Server::onSocketError);
+        connect(socket, &QTcpSocket::errorOccurred, this, &Server::onSocketError);
         
         qDebug() << "New client connected from" << socket->peerAddress().toString();
     }
@@ -91,16 +90,24 @@ void Server::onDisconnected()
     socket->deleteLater();
 }
 
-void Server::onSocketError(QAbstractSocket::SocketError error)
+void Server::onSocketError(QAbstractSocket::SocketError socketError)
 {
+    Q_UNUSED(socketError)
     QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
     if (socket) {
         qDebug() << "Socket error:" << socket->errorString();
-        emit error(socket->errorString());
+        emit this->error(socket->errorString());
     }
 }
 
-void Server::processMessage(QTcpSocket *socket, const Message &msg)
+void Server::processMessage(QTcpSocket *socket, const QByteArray &data)
+{
+    auto msgOpt = Message::deserialize(data);
+    if (!msgOpt) {
+        qDebug() << "Failed to deserialize message in processMessage";
+        return;
+    }
+    const Message &msg = *msgOpt;
 {
     switch (msg.type()) {
     case MessageType::LoginRequest:
@@ -118,6 +125,7 @@ void Server::processMessage(QTcpSocket *socket, const Message &msg)
     default:
         qDebug() << "Unknown message type:" << static_cast<int>(msg.type());
     }
+}
 }
 
 void Server::handleLogin(QTcpSocket *socket, const Message &msg)
@@ -282,8 +290,7 @@ bool Server::readMessageFromBuffer(QTcpSocket* socket)
         return true; // Consume the bad data and continue
     }
 
-    Message msg = *msgOpt;
-    processMessage(socket, msg);
+    processMessage(socket, messageData);
     return true; // Successfully processed a message
 }
 
