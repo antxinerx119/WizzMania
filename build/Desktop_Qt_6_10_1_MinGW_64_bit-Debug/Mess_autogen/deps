@@ -566,4 +566,6 @@ Mess_autogen/timestamp: \
 	C:/Users/mitch/OneDrive/Documents/Mess/mainwindow.h \
 	C:/Users/mitch/OneDrive/Documents/Mess/messagewindow.cpp \
 	C:/Users/mitch/OneDrive/Documents/Mess/messagewindow.h \
+	C:/Users/mitch/OneDrive/Documents/Mess/registerwindow.cpp \
+	C:/Users/mitch/OneDrive/Documents/Mess/registerwindow.h \
 	C:/Qt/Tools/CMake_64/bin/cmake.exe

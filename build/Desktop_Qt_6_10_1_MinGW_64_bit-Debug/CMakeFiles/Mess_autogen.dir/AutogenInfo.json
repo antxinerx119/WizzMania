@@ -332,6 +332,12 @@
 			"MU",
 			"EWIEGA46WW/moc_messagewindow.cpp",
 			null
+		],
+		[
+			"C:/Users/mitch/OneDrive/Documents/Mess/registerwindow.h",
+			"MU",
+			"EWIEGA46WW/moc_registerwindow.cpp",
+			null
 		]
 	],
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
@@ -410,6 +416,11 @@
 		[ "C:/Users/mitch/OneDrive/Documents/Mess/mainwindow.cpp", "MU", null ],
 		[
 			"C:/Users/mitch/OneDrive/Documents/Mess/messagewindow.cpp",
+			"MU",
+			null
+		],
+		[
+			"C:/Users/mitch/OneDrive/Documents/Mess/registerwindow.cpp",
 			"MU",
 			null
 		]

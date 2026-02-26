@@ -15,6 +15,7 @@ public:
 
 signals:
     void loginRequested(QString username);
+    void registerRequested();
     //à ajouter une fois le mot de passe opérationnel
     //void loginRequested(QString username, QString motdepasse);
 
@@ -22,6 +23,7 @@ private:
     QLineEdit *usernameInput;
     //QLineEdit *passwordInput;
     QPushButton *loginButton;
+    QPushButton *registerButton;
 };
 
 #endif // LOGINWINDOW_H

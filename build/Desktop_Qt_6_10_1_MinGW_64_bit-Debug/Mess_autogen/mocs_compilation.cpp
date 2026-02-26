@@ -2,3 +2,4 @@
 #include "EWIEGA46WW/moc_loginwindow.cpp"
 #include "EWIEGA46WW/moc_mainwindow.cpp"
 #include "EWIEGA46WW/moc_messagewindow.cpp"
+#include "EWIEGA46WW/moc_registerwindow.cpp"
