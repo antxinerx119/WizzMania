@@ -51,6 +51,7 @@ set(SERVER_SOURCES
     server/main_server.cpp
     server/Server.h
     server/Server.cpp
+    server/MessageHandler.cpp
     server/database.hpp
 )
 

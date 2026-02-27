@@ -5,6 +5,7 @@
 Server::Server(QObject *parent)
     : QObject(parent)
     , m_server(new QTcpServer(this))
+    , m_messageHandler(new MessageHandler(this))
 {
     connect(m_server, &QTcpServer::newConnection, this, &Server::onNewConnection);
 }
@@ -12,6 +13,7 @@ Server::Server(QObject *parent)
 Server::~Server()
 {
     stop();
+    delete m_messageHandler;
 }
 
 bool Server::start(quint16 port)
@@ -100,131 +102,6 @@ void Server::onSocketError(QAbstractSocket::SocketError socketError)
     }
 }
 
-void Server::processMessage(QTcpSocket *socket, const QByteArray &data)
-{
-    auto msgOpt = Message::deserialize(data);
-    if (!msgOpt) {
-        qDebug() << "Failed to deserialize message in processMessage";
-        return;
-    }
-    const Message &msg = *msgOpt;
-{
-    switch (msg.type()) {
-    case MessageType::LoginRequest:
-        handleLogin(socket, msg);
-        break;
-        
-    case MessageType::ChatMessage:
-        handleChatMessage(socket, msg);
-        break;
-        
-    case MessageType::Wizz:
-        handleWizz(socket, msg);
-        break;
-        
-    default:
-        qDebug() << "Unknown message type:" << static_cast<int>(msg.type());
-    }
-}
-}
-
-void Server::handleLogin(QTcpSocket *socket, const Message &msg)
-{
-    // On attend username et password concaténés avec '\n'
-    QStringList parts = msg.content().split("\n");
-    QString username = parts.value(0);
-    QString password = parts.value(1);
-
-    if (username.isEmpty()) {
-        Message response(MessageType::LoginResponse, "Username cannot be empty");
-        sendToClient(socket, response);
-        return;
-    }
-
-    // Check if username is already taken
-    if (m_usernameToSocket.contains(username)) {
-        Message response(MessageType::LoginResponse, "Username already taken");
-        sendToClient(socket, response);
-        return;
-    }
-
-    // Authentification
-    if (!m_db.authenticateUser(username, password)) {
-        Message response(MessageType::LoginResponse, "Invalid username or password");
-        sendToClient(socket, response);
-        return;
-    }
-
-    // Add client
-    m_clients[socket] = username;
-    m_usernameToSocket[username] = socket;
-    m_pendingLogins.remove(socket);
-
-    // Send success response
-    Message response(MessageType::LoginResponse, "success");
-    sendToClient(socket, response);
-
-    // Send user list
-    sendUserList(socket);
-
-    // Notify others
-    Message joinMsg(MessageType::UserJoin, username);
-    broadcast(joinMsg, socket);
-
-    qDebug() << "User" << username << "logged in";
-    emit clientConnected(username);
-}
-
-void Server::handleChatMessage(QTcpSocket *socket, const Message &msg)
-{
-    QString username = m_clients.value(socket);
-    if (username.isEmpty()) {
-        return;
-    }
-
-    QString content = msg.content();
-    if (content.isEmpty()) {
-        return;
-    }
-
-    // Save to database
-    m_db.saveMessage(username, content);
-
-    // Broadcast to all other clients
-    Message broadcastMsg(MessageType::ChatBroadcast, content);
-    broadcastMsg.setSender(username);
-    broadcast(broadcastMsg, socket);
-
-    qDebug() << "Message from" << username << ":" << content;
-    emit messageReceived(username, content);
-}
-
-void Server::handleWizz(QTcpSocket *socket, const Message &msg)
-{
-    QString username = m_clients.value(socket);
-    if (username.isEmpty()) {
-        return;
-    }
-
-    QString target = msg.content();
-    
-    Message wizzMsg(MessageType::Wizz);
-    wizzMsg.setSender(username);
-
-    if (target.isEmpty()) {
-        // Wizz everyone
-        broadcast(wizzMsg, socket);
-        qDebug() << "Wizz from" << username << "to everyone";
-    } else {
-        // Wizz specific user
-        QTcpSocket *targetSocket = m_usernameToSocket.value(target);
-        if (targetSocket) {
-            sendToClient(targetSocket, wizzMsg);
-            qDebug() << "Wizz from" << username << "to" << target;
-        }
-    }
-}
-
 void Server::sendToClient(QTcpSocket *socket, const Message &message)
 {
     QByteArray data = message.serialize();
@@ -290,7 +167,7 @@ bool Server::readMessageFromBuffer(QTcpSocket* socket)
         return true; // Consume the bad data and continue
     }
 
-    processMessage(socket, messageData);
+    m_messageHandler->processData(socket, messageData);
     return true; // Successfully processed a message
 }
 

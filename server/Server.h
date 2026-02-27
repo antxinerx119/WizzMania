@@ -8,9 +8,11 @@
 #include "database.hpp"
 #include "Message.h"
 #include "Protocol.h"
+#include "MessageHandler.h"
 
 class Server : public QObject {
     Q_OBJECT
+    friend class MessageHandler;
 
 public:
     explicit Server(QObject *parent = nullptr);
@@ -32,11 +34,6 @@ private slots:
     void onSocketError(QAbstractSocket::SocketError error);
 
 private:
-    void processMessage(QTcpSocket *socket, const QByteArray &data);
-    void handleLogin(QTcpSocket *socket, const Message &msg);
-    void handleChatMessage(QTcpSocket *socket, const Message &msg);
-    void handleWizz(QTcpSocket *socket, const Message &msg);
-
     void sendToClient(QTcpSocket *socket, const Message &message);
     void broadcast(const Message &message, QTcpSocket *excludeSocket = nullptr);
     void sendUserList(QTcpSocket *socket);
@@ -48,6 +45,7 @@ private:
     Database m_db;
     QSet<QTcpSocket*> m_pendingLogins; // clients awaiting login
     QMap<QTcpSocket*, QByteArray> m_clientReadBuffers; // Buffer for incoming data for each client
+    MessageHandler *m_messageHandler;
 };
 
 #endif // SERVER_H
