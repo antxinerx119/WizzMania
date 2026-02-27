@@ -143,8 +143,12 @@ void ClientNetwork::processData(const QByteArray &data)
         if (msg.content() == "success") {
             m_loggedIn = true;
             emit loginSuccess(m_username);
-        } else {
+        } else if (!m_loggedIn) {
             emit loginFailed(msg.content());
+        } else {
+            // It's the user list being sent immediately after success
+            qDebug() << "Received user list:" << msg.content();
+            // Optional: emit userListReceived(msg.content().split(","));
         }
         break;
 

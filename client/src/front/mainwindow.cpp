@@ -61,6 +61,7 @@ void MainWindow::onConnected()
 
 void MainWindow::onDisconnected()
 {
+    m_stack->setCurrentIndex(0);
     QMessageBox::warning(this, "Disconnected", "You have been disconnected from the server.");
 }
 

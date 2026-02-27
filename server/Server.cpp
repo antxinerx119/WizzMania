@@ -105,11 +105,17 @@ void Server::handleLogin(QTcpSocket *socket, const Message &msg)
         return;
     }
 
-    // Check if username is already taken
+    // Check if username is already taken by a logged-in user
     if (m_usernameToSocket.contains(username)) {
         Message response(MessageType::LoginResponse, "Username already taken");
         sendToClient(socket, response);
         return;
+    }
+
+    // Auto-register user if they do not exist
+    if (!m_db.userExists(username)) {
+        qDebug() << "User does not exist, auto-registering:" << username;
+        m_db.registerUser(username, password);
     }
 
     // Authentification
