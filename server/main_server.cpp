@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("WizzMania Server");
 
-    quint16 port = 1234;
+    quint16 port = 12345;
 
     QStringList args = app.arguments();
     int portIndex = args.indexOf("--port");
