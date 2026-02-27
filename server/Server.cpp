@@ -92,6 +92,53 @@ void Server::onDisconnected()
     socket->deleteLater();
 }
 
+void Server::handleLogin(QTcpSocket *socket, const Message &msg)
+{
+    // On attend username et password concaténés avec '\n'
+    QStringList parts = msg.content().split("\n");
+    QString username = parts.value(0);
+    QString password = parts.value(1);
+
+    if (username.isEmpty()) {
+        Message response(MessageType::LoginResponse, "Username cannot be empty");
+        sendToClient(socket, response);
+        return;
+    }
+
+    // Check if username is already taken
+    if (m_usernameToSocket.contains(username)) {
+        Message response(MessageType::LoginResponse, "Username already taken");
+        sendToClient(socket, response);
+        return;
+    }
+
+    // Authentification
+    if (!m_db.authenticateUser(username, password)) {
+        Message response(MessageType::LoginResponse, "Invalid username or password");
+        sendToClient(socket, response);
+        return;
+    }
+
+    // Add client
+    m_clients[socket] = username;
+    m_usernameToSocket[username] = socket;
+    m_pendingLogins.remove(socket);
+
+    // Send success response
+    Message response(MessageType::LoginResponse, "success");
+    sendToClient(socket, response);
+
+    // Send user list
+    sendUserList(socket);
+
+    // Notify others
+    Message joinMsg(MessageType::UserJoin, username);
+    broadcast(joinMsg, socket);
+
+    qDebug() << "User" << username << "logged in";
+    emit clientConnected(username);
+}
+
 void Server::onSocketError(QAbstractSocket::SocketError socketError)
 {
     Q_UNUSED(socketError)

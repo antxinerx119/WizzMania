@@ -16,7 +16,6 @@ public:
     void processData(QTcpSocket *socket, const QByteArray &data);
 
 private:
-    void handleLogin(QTcpSocket *socket, const Message &msg);
     void handleChatMessage(QTcpSocket *socket, const Message &msg);
     void handleWizz(QTcpSocket *socket, const Message &msg);
 

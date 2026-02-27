@@ -19,7 +19,7 @@ void MessageHandler::processData(QTcpSocket *socket, const QByteArray &data)
 
     switch (msg.type()) {
     case MessageType::LoginRequest:
-        handleLogin(socket, msg);
+        m_server->handleLogin(socket, msg);
         break;
         
     case MessageType::ChatMessage:
@@ -35,52 +35,6 @@ void MessageHandler::processData(QTcpSocket *socket, const QByteArray &data)
     }
 }
 
-void MessageHandler::handleLogin(QTcpSocket *socket, const Message &msg)
-{
-    // On attend username et password concaténés avec '\n'
-    QStringList parts = msg.content().split("\n");
-    QString username = parts.value(0);
-    QString password = parts.value(1);
-
-    if (username.isEmpty()) {
-        Message response(MessageType::LoginResponse, "Username cannot be empty");
-        m_server->sendToClient(socket, response);
-        return;
-    }
-
-    // Check if username is already taken
-    if (m_server->m_usernameToSocket.contains(username)) {
-        Message response(MessageType::LoginResponse, "Username already taken");
-        m_server->sendToClient(socket, response);
-        return;
-    }
-
-    // Authentification
-    if (!m_server->m_db.authenticateUser(username, password)) {
-        Message response(MessageType::LoginResponse, "Invalid username or password");
-        m_server->sendToClient(socket, response);
-        return;
-    }
-
-    // Add client
-    m_server->m_clients[socket] = username;
-    m_server->m_usernameToSocket[username] = socket;
-    m_server->m_pendingLogins.remove(socket);
-
-    // Send success response
-    Message response(MessageType::LoginResponse, "success");
-    m_server->sendToClient(socket, response);
-
-    // Send user list
-    m_server->sendUserList(socket);
-
-    // Notify others
-    Message joinMsg(MessageType::UserJoin, username);
-    m_server->broadcast(joinMsg, socket);
-
-    qDebug() << "User" << username << "logged in";
-    emit m_server->clientConnected(username);
-}
 
 void MessageHandler::handleChatMessage(QTcpSocket *socket, const Message &msg)
 {

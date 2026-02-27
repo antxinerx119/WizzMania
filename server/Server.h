@@ -34,6 +34,7 @@ private slots:
     void onSocketError(QAbstractSocket::SocketError error);
 
 private:
+    void handleLogin(QTcpSocket *socket, const Message &msg);
     void sendToClient(QTcpSocket *socket, const Message &message);
     void broadcast(const Message &message, QTcpSocket *excludeSocket = nullptr);
     void sendUserList(QTcpSocket *socket);
