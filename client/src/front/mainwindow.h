@@ -11,6 +11,9 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+class QStackedWidget;
+class MessageWindow;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -41,5 +44,7 @@ private:
     QString m_currentPassword;
     QPoint m_wizzOffset;
     QAbstractAnimation *m_wizzAnimation;
+    QStackedWidget *m_stack;
+    MessageWindow *m_messagingWindow;
 };
 #endif // MAINWINDOW_H

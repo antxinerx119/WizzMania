@@ -19,6 +19,12 @@ public:
     void setUsername(const QString &name);
     void updateUserList(const QStringList &users);
 
+    void displayMessage(const QString &sender, const QString &text);
+    void displayNotification(const QString &text);
+
+signals:
+    void messageSent(const QString &text);
+
 private slots:
     void sendMessage();
 

@@ -14,15 +14,15 @@ MainWindow::MainWindow(QWidget *parent)
     , m_wizzOffset(0, 0)
     , m_wizzAnimation(nullptr)
 {
-    auto *stack = new QStackedWidget;
+    m_stack = new QStackedWidget;
 
     auto *login = new LoginWindow;
-    auto *messaging = new MessageWindow;
+    m_messagingWindow = new MessageWindow;
 
-    stack->addWidget(login);      // index 0
-    stack->addWidget(messaging);  // index 1
+    m_stack->addWidget(login);      // index 0
+    m_stack->addWidget(m_messagingWindow);  // index 1
 
-    setCentralWidget(stack);
+    setCentralWidget(m_stack);
 
     // Connect login signal to our handler
     connect(login, &LoginWindow::loginRequested, this, &MainWindow::onLoginRequested);
@@ -36,8 +36,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &ClientNetwork::wizzReceived, this, &MainWindow::onWizzReceived);
     connect(m_network, &ClientNetwork::error, this, &MainWindow::onNetworkError);
 
-    // Store messaging window reference for later use (would need to make it accessible)
-    // For now, we'll handle this differently
+    connect(m_messagingWindow, &MessageWindow::messageSent, this, [this](const QString &text) {
+        m_network->sendChatMessage(text);
+        m_messagingWindow->displayMessage(m_currentUsername, text);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -65,8 +67,8 @@ void MainWindow::onDisconnected()
 void MainWindow::onLoginSuccess(const QString &username)
 {
     // Switch to messaging window
-    // Note: Need to access the messaging window - for now just show a message
-    QMessageBox::information(this, "Connected", "Welcome " + username + "!");
+    m_stack->setCurrentIndex(1);
+    m_messagingWindow->setUsername(username);
 }
 
 void MainWindow::onLoginFailed(const QString &error)
@@ -78,14 +80,12 @@ void MainWindow::onLoginFailed(const QString &error)
 void MainWindow::onMessageReceived(const Message &message)
 {
     // Display message in the message window
-    // This would need access to the MessageWindow
-    qDebug() << "Message from" << message.sender() << ":" << message.content();
+    m_messagingWindow->displayMessage(message.sender(), message.content());
 }
 
 void MainWindow::onWizzReceived(const QString &fromUsername)
 {
-    // Show wizz notification with animation
-    QMessageBox::information(this, "Wizz!", fromUsername + " vous a envoyé un Wizz!");
+    m_messagingWindow->displayNotification(fromUsername + " vous a envoyé un Wizz!");
     
     // Perform shake animation
     performWizzAnimation();

@@ -61,7 +61,15 @@ void MessageWindow::updateUserList(const QStringList &users) {
 void MessageWindow::sendMessage() {
     QString text = messageInput->text().trimmed();
     if (!text.isEmpty()) {
-        messageDisplay->append("<b>Moi :</b> " + text);
+        emit messageSent(text);
         messageInput->clear();
     }
+}
+
+void MessageWindow::displayMessage(const QString &sender, const QString &text) {
+    messageDisplay->append("<b>" + sender + " :</b> " + text);
+}
+
+void MessageWindow::displayNotification(const QString &text) {
+    messageDisplay->append("<i><font color='gray'>" + text + "</font></i>");
 }
