@@ -12,6 +12,8 @@ class MainWindow;
 QT_END_NAMESPACE
 
 class QStackedWidget;
+class LoginWindow;
+class RegisterWindow;
 class MessageWindow;
 
 class MainWindow : public QMainWindow
@@ -28,6 +30,7 @@ public:
 
 private slots:
     void onLoginRequested(const QString &username, const QString &password);
+    void onRegisterRequested(const QString &username, const QString &password);
     void onConnected();
     void onDisconnected();
     void onLoginSuccess(const QString &username);
@@ -38,6 +41,8 @@ private slots:
     void performWizzAnimation();
 
 private:
+    void startAuthentication(const QString &username, const QString &password, bool registrationFlow);
+
     Ui::MainWindow *ui;
     ClientNetwork *m_network;
     QString m_currentUsername;
@@ -45,6 +50,10 @@ private:
     QPoint m_wizzOffset;
     QAbstractAnimation *m_wizzAnimation;
     QStackedWidget *m_stack;
+    LoginWindow *m_loginWindow;
+    RegisterWindow *m_registerWindow;
     MessageWindow *m_messagingWindow;
+    bool m_hasAuthenticatedSession;
+    bool m_registrationInProgress;
 };
 #endif // MAINWINDOW_H

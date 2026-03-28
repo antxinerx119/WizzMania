@@ -14,14 +14,18 @@ public:
     explicit RegisterWindow(QWidget *parent = nullptr);
 
 signals:
-    //à ajouter une fois que les inscriptions pour etre faites
-    //void RegisterRequested(QString username, QString motdepasse);
-    void passRegister();
+    void registerRequested(QString username, QString password);
+    void backRequested();
+
+private slots:
+    void submitRegistration();
 
 private:
     QLineEdit *usernameInput;
-    //QLineEdit *passwordInput;
+    QLineEdit *passwordInput;
+    QLineEdit *confirmPasswordInput;
     QPushButton *registerButton;
+    QPushButton *backButton;
 };
 
 #endif // REGISTERWINDOW_H

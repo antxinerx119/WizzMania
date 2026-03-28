@@ -1,33 +1,41 @@
 #include "mainwindow.h"
 #include "loginwindow.h"
 #include "messagewindow.h"
+#include "registerwindow.h"
 #include "Message.h"
 
-#include <QStackedWidget>
 #include <QMessageBox>
 #include <QPropertyAnimation>
 #include <QSequentialAnimationGroup>
+#include <QStackedWidget>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , ui(nullptr)
     , m_network(new ClientNetwork(this))
     , m_wizzOffset(0, 0)
     , m_wizzAnimation(nullptr)
+    , m_stack(new QStackedWidget)
+    , m_loginWindow(new LoginWindow)
+    , m_registerWindow(new RegisterWindow)
+    , m_messagingWindow(new MessageWindow)
+    , m_hasAuthenticatedSession(false)
+    , m_registrationInProgress(false)
 {
-    m_stack = new QStackedWidget;
-
-    auto *login = new LoginWindow;
-    m_messagingWindow = new MessageWindow;
-
-    m_stack->addWidget(login);      // index 0
-    m_stack->addWidget(m_messagingWindow);  // index 1
-
+    m_stack->addWidget(m_loginWindow);
+    m_stack->addWidget(m_registerWindow);
+    m_stack->addWidget(m_messagingWindow);
     setCentralWidget(m_stack);
 
-    // Connect login signal to our handler
-    connect(login, &LoginWindow::loginRequested, this, &MainWindow::onLoginRequested);
+    connect(m_loginWindow, &LoginWindow::loginRequested, this, &MainWindow::onLoginRequested);
+    connect(m_loginWindow, &LoginWindow::registerRequested, this, [this]() {
+        m_stack->setCurrentIndex(1);
+    });
+    connect(m_registerWindow, &RegisterWindow::registerRequested, this, &MainWindow::onRegisterRequested);
+    connect(m_registerWindow, &RegisterWindow::backRequested, this, [this]() {
+        m_stack->setCurrentIndex(0);
+    });
 
-    // Connect network signals
     connect(m_network, &ClientNetwork::connected, this, &MainWindow::onConnected);
     connect(m_network, &ClientNetwork::disconnected, this, &MainWindow::onDisconnected);
     connect(m_network, &ClientNetwork::loginSuccess, this, &MainWindow::onLoginSuccess);
@@ -48,47 +56,76 @@ MainWindow::~MainWindow()
 
 void MainWindow::onLoginRequested(const QString &username, const QString &password)
 {
-    m_currentUsername = username;
+    startAuthentication(username, password, false);
+}
+
+void MainWindow::onRegisterRequested(const QString &username, const QString &password)
+{
+    startAuthentication(username, password, true);
+}
+
+void MainWindow::startAuthentication(const QString &username, const QString &password, bool registrationFlow)
+{
+    const QString trimmedUsername = username.trimmed();
+
+    if (trimmedUsername.isEmpty()) {
+        QMessageBox::warning(this, registrationFlow ? "Inscription" : "Connexion", "Le nom d'utilisateur est obligatoire.");
+        return;
+    }
+
+    if (password.isEmpty()) {
+        QMessageBox::warning(this, registrationFlow ? "Inscription" : "Connexion", "Le mot de passe est obligatoire.");
+        return;
+    }
+
+    m_currentUsername = trimmedUsername;
     m_currentPassword = password;
-    // Connect to local server by default
+    m_registrationInProgress = registrationFlow;
     m_network->connectToServer("127.0.0.1", 12345);
 }
 
 void MainWindow::onConnected()
 {
     m_network->sendLogin(m_currentUsername, m_currentPassword);
+    m_currentPassword.clear();
 }
 
 void MainWindow::onDisconnected()
 {
+    const bool showDisconnectWarning = m_hasAuthenticatedSession;
+    m_hasAuthenticatedSession = false;
+    m_registrationInProgress = false;
     m_stack->setCurrentIndex(0);
-    QMessageBox::warning(this, "Disconnected", "You have been disconnected from the server.");
+
+    if (showDisconnectWarning) {
+        QMessageBox::warning(this, "Disconnected", "You have been disconnected from the server.");
+    }
 }
 
 void MainWindow::onLoginSuccess(const QString &username)
 {
-    // Switch to messaging window
-    m_stack->setCurrentIndex(1);
+    m_hasAuthenticatedSession = true;
+    m_registrationInProgress = false;
+    m_stack->setCurrentIndex(2);
     m_messagingWindow->setUsername(username);
 }
 
 void MainWindow::onLoginFailed(const QString &error)
 {
-    QMessageBox::warning(this, "Login Failed", error);
+    QMessageBox::warning(this, m_registrationInProgress ? "Inscription impossible" : "Connexion impossible", error);
+    m_hasAuthenticatedSession = false;
+    m_registrationInProgress = false;
     m_network->disconnect();
 }
 
 void MainWindow::onMessageReceived(const Message &message)
 {
-    // Display message in the message window
     m_messagingWindow->displayMessage(message.sender(), message.content());
 }
 
 void MainWindow::onWizzReceived(const QString &fromUsername)
 {
-    m_messagingWindow->displayNotification(fromUsername + " vous a envoyé un Wizz!");
-    
-    // Perform shake animation
+    m_messagingWindow->displayNotification(fromUsername + " vous a envoye un Wizz!");
     performWizzAnimation();
 }
 
@@ -105,29 +142,20 @@ void MainWindow::setWizzOffset(const QPoint &offset)
 
 void MainWindow::performWizzAnimation()
 {
-    // Create a sequential animation group with multiple shake movements
     if (m_wizzAnimation) {
         delete m_wizzAnimation;
     }
 
-    QSequentialAnimationGroup *group = new QSequentialAnimationGroup(this);
+    auto *group = new QSequentialAnimationGroup(this);
 
-    // Shake effect: move left, right, left, right, center
     for (int i = 0; i < 5; ++i) {
-        QPropertyAnimation *anim = new QPropertyAnimation(this, "wizzOffset", this);
+        auto *anim = new QPropertyAnimation(this, "wizzOffset", this);
         anim->setDuration(50);
-
-        if (i % 2 == 0) {
-            anim->setEndValue(QPoint(-10, 0)); // Move left
-        } else {
-            anim->setEndValue(QPoint(10, 0));  // Move right
-        }
-
+        anim->setEndValue(i % 2 == 0 ? QPoint(-10, 0) : QPoint(10, 0));
         group->addAnimation(anim);
     }
 
-    // Final animation to return to original position
-    QPropertyAnimation *finalAnim = new QPropertyAnimation(this, "wizzOffset", this);
+    auto *finalAnim = new QPropertyAnimation(this, "wizzOffset", this);
     finalAnim->setDuration(50);
     finalAnim->setEndValue(QPoint(0, 0));
     group->addAnimation(finalAnim);
@@ -136,4 +164,3 @@ void MainWindow::performWizzAnimation()
     connect(m_wizzAnimation, &QAbstractAnimation::finished, m_wizzAnimation, &QObject::deleteLater);
     m_wizzAnimation->start();
 }
-
