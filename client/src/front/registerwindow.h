@@ -13,14 +13,21 @@ class RegisterWindow : public QWidget
 public:
     explicit RegisterWindow(QWidget *parent = nullptr);
 
+    void setServerEndpoint(const QString &host, quint16 port);
+
 signals:
-    void registerRequested(QString username, QString password);
-    void backRequested();
+    void registerRequested(QString username, QString password, QString host, quint16 port);
+    void backRequested(QString host, quint16 port);
 
 private slots:
     void submitRegistration();
+    void goBack();
 
 private:
+    bool parseEndpoint(QString &host, quint16 &port) const;
+
+    QLineEdit *serverHostInput;
+    QLineEdit *serverPortInput;
     QLineEdit *usernameInput;
     QLineEdit *passwordInput;
     QLineEdit *confirmPasswordInput;

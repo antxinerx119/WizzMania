@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(nullptr)
     , m_network(new ClientNetwork(this))
+    , m_serverHost("127.0.0.1")
+    , m_serverPort(12345)
     , m_wizzOffset(0, 0)
     , m_wizzAnimation(nullptr)
     , m_stack(new QStackedWidget)
@@ -22,19 +24,18 @@ MainWindow::MainWindow(QWidget *parent)
     , m_hasAuthenticatedSession(false)
     , m_registrationInProgress(false)
 {
+    m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_registerWindow->setServerEndpoint(m_serverHost, m_serverPort);
+
     m_stack->addWidget(m_loginWindow);
     m_stack->addWidget(m_registerWindow);
     m_stack->addWidget(m_messagingWindow);
     setCentralWidget(m_stack);
 
     connect(m_loginWindow, &LoginWindow::loginRequested, this, &MainWindow::onLoginRequested);
-    connect(m_loginWindow, &LoginWindow::registerRequested, this, [this]() {
-        m_stack->setCurrentIndex(1);
-    });
+    connect(m_loginWindow, &LoginWindow::registerRequested, this, &MainWindow::onRegistrationPageRequested);
     connect(m_registerWindow, &RegisterWindow::registerRequested, this, &MainWindow::onRegisterRequested);
-    connect(m_registerWindow, &RegisterWindow::backRequested, this, [this]() {
-        m_stack->setCurrentIndex(0);
-    });
+    connect(m_registerWindow, &RegisterWindow::backRequested, this, &MainWindow::onRegisterBackRequested);
 
     connect(m_network, &ClientNetwork::connected, this, &MainWindow::onConnected);
     connect(m_network, &ClientNetwork::disconnected, this, &MainWindow::onDisconnected);
@@ -57,19 +58,36 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::onLoginRequested(const QString &username, const QString &password)
+void MainWindow::onLoginRequested(const QString &username, const QString &password, const QString &host, quint16 port)
 {
-    startAuthentication(username, password, false);
+    startAuthentication(username, password, host, port, false);
 }
 
-void MainWindow::onRegisterRequested(const QString &username, const QString &password)
+void MainWindow::onRegistrationPageRequested(const QString &host, quint16 port)
 {
-    startAuthentication(username, password, true);
+    m_serverHost = host;
+    m_serverPort = port;
+    m_registerWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_stack->setCurrentIndex(1);
 }
 
-void MainWindow::startAuthentication(const QString &username, const QString &password, bool registrationFlow)
+void MainWindow::onRegisterRequested(const QString &username, const QString &password, const QString &host, quint16 port)
+{
+    startAuthentication(username, password, host, port, true);
+}
+
+void MainWindow::onRegisterBackRequested(const QString &host, quint16 port)
+{
+    m_serverHost = host;
+    m_serverPort = port;
+    m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_stack->setCurrentIndex(0);
+}
+
+void MainWindow::startAuthentication(const QString &username, const QString &password, const QString &host, quint16 port, bool registrationFlow)
 {
     const QString trimmedUsername = username.trimmed();
+    const QString trimmedHost = host.trimmed();
 
     if (trimmedUsername.isEmpty()) {
         QMessageBox::warning(this, registrationFlow ? "Inscription" : "Connexion", "Le nom d'utilisateur est obligatoire.");
@@ -81,10 +99,24 @@ void MainWindow::startAuthentication(const QString &username, const QString &pas
         return;
     }
 
+    if (trimmedHost.isEmpty()) {
+        QMessageBox::warning(this, registrationFlow ? "Inscription" : "Connexion", "L'adresse du serveur est obligatoire.");
+        return;
+    }
+
+    if (port == 0) {
+        QMessageBox::warning(this, registrationFlow ? "Inscription" : "Connexion", "Le port du serveur est invalide.");
+        return;
+    }
+
     m_currentUsername = trimmedUsername;
     m_currentPassword = password;
+    m_serverHost = trimmedHost;
+    m_serverPort = port;
     m_registrationInProgress = registrationFlow;
-    m_network->connectToServer("127.0.0.1", 12345);
+    m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_registerWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_network->connectToServer(m_serverHost, m_serverPort);
 }
 
 void MainWindow::onConnected()
@@ -100,6 +132,8 @@ void MainWindow::onDisconnected()
     m_registrationInProgress = false;
     m_onlineUsers.clear();
     syncUserListDisplay();
+    m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    m_registerWindow->setServerEndpoint(m_serverHost, m_serverPort);
     m_stack->setCurrentIndex(0);
 
     if (showDisconnectWarning) {

@@ -30,8 +30,10 @@ public:
     void setWizzOffset(const QPoint &offset);
 
 private slots:
-    void onLoginRequested(const QString &username, const QString &password);
-    void onRegisterRequested(const QString &username, const QString &password);
+    void onLoginRequested(const QString &username, const QString &password, const QString &host, quint16 port);
+    void onRegistrationPageRequested(const QString &host, quint16 port);
+    void onRegisterRequested(const QString &username, const QString &password, const QString &host, quint16 port);
+    void onRegisterBackRequested(const QString &host, quint16 port);
     void onConnected();
     void onDisconnected();
     void onLoginSuccess(const QString &username);
@@ -45,13 +47,15 @@ private slots:
     void performWizzAnimation();
 
 private:
-    void startAuthentication(const QString &username, const QString &password, bool registrationFlow);
+    void startAuthentication(const QString &username, const QString &password, const QString &host, quint16 port, bool registrationFlow);
     void syncUserListDisplay();
 
     Ui::MainWindow *ui;
     ClientNetwork *m_network;
     QString m_currentUsername;
     QString m_currentPassword;
+    QString m_serverHost;
+    quint16 m_serverPort;
     QStringList m_onlineUsers;
     QPoint m_wizzOffset;
     QAbstractAnimation *m_wizzAnimation;
