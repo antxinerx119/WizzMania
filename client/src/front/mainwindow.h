@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPropertyAnimation>
+#include <QStringList>
 #include "../back/ClientNetwork.h"
 
 QT_BEGIN_NAMESPACE
@@ -35,6 +36,9 @@ private slots:
     void onDisconnected();
     void onLoginSuccess(const QString &username);
     void onLoginFailed(const QString &error);
+    void onUserListReceived(const QStringList &users);
+    void onUserJoined(const QString &username);
+    void onUserLeft(const QString &username);
     void onMessageReceived(const Message &message);
     void onWizzReceived(const QString &fromUsername);
     void onNetworkError(const QString &errorMessage);
@@ -42,11 +46,13 @@ private slots:
 
 private:
     void startAuthentication(const QString &username, const QString &password, bool registrationFlow);
+    void syncUserListDisplay();
 
     Ui::MainWindow *ui;
     ClientNetwork *m_network;
     QString m_currentUsername;
     QString m_currentPassword;
+    QStringList m_onlineUsers;
     QPoint m_wizzOffset;
     QAbstractAnimation *m_wizzAnimation;
     QStackedWidget *m_stack;

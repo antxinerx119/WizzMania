@@ -24,6 +24,7 @@ MessageWindow::MessageWindow(QWidget *parent)
     // User list widget
     userListWidget = new QListWidget;
     userListWidget->setMaximumWidth(200);
+    userListWidget->setAlternatingRowColors(true);
 
     auto inputLayout = new QHBoxLayout;
     inputLayout->addWidget(messageInput);

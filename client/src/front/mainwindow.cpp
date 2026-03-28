@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &ClientNetwork::disconnected, this, &MainWindow::onDisconnected);
     connect(m_network, &ClientNetwork::loginSuccess, this, &MainWindow::onLoginSuccess);
     connect(m_network, &ClientNetwork::loginFailed, this, &MainWindow::onLoginFailed);
+    connect(m_network, &ClientNetwork::userListReceived, this, &MainWindow::onUserListReceived);
+    connect(m_network, &ClientNetwork::userJoined, this, &MainWindow::onUserJoined);
+    connect(m_network, &ClientNetwork::userLeft, this, &MainWindow::onUserLeft);
     connect(m_network, &ClientNetwork::messageReceived, this, &MainWindow::onMessageReceived);
     connect(m_network, &ClientNetwork::wizzReceived, this, &MainWindow::onWizzReceived);
     connect(m_network, &ClientNetwork::error, this, &MainWindow::onNetworkError);
@@ -95,6 +98,8 @@ void MainWindow::onDisconnected()
     const bool showDisconnectWarning = m_hasAuthenticatedSession;
     m_hasAuthenticatedSession = false;
     m_registrationInProgress = false;
+    m_onlineUsers.clear();
+    syncUserListDisplay();
     m_stack->setCurrentIndex(0);
 
     if (showDisconnectWarning) {
@@ -108,6 +113,11 @@ void MainWindow::onLoginSuccess(const QString &username)
     m_registrationInProgress = false;
     m_stack->setCurrentIndex(2);
     m_messagingWindow->setUsername(username);
+
+    if (!m_onlineUsers.contains(username)) {
+        m_onlineUsers.append(username);
+        syncUserListDisplay();
+    }
 }
 
 void MainWindow::onLoginFailed(const QString &error)
@@ -116,6 +126,49 @@ void MainWindow::onLoginFailed(const QString &error)
     m_hasAuthenticatedSession = false;
     m_registrationInProgress = false;
     m_network->disconnect();
+}
+
+void MainWindow::onUserListReceived(const QStringList &users)
+{
+    m_onlineUsers = users;
+    if (!m_currentUsername.isEmpty() && !m_onlineUsers.contains(m_currentUsername)) {
+        m_onlineUsers.append(m_currentUsername);
+    }
+    syncUserListDisplay();
+}
+
+void MainWindow::onUserJoined(const QString &username)
+{
+    const QString trimmedUsername = username.trimmed();
+    if (trimmedUsername.isEmpty()) {
+        return;
+    }
+
+    if (!m_onlineUsers.contains(trimmedUsername)) {
+        m_onlineUsers.append(trimmedUsername);
+        syncUserListDisplay();
+    }
+
+    if (m_hasAuthenticatedSession && trimmedUsername != m_currentUsername) {
+        m_messagingWindow->displayNotification(trimmedUsername + " a rejoint le chat.");
+    }
+}
+
+void MainWindow::onUserLeft(const QString &username)
+{
+    const QString trimmedUsername = username.trimmed();
+    if (trimmedUsername.isEmpty()) {
+        return;
+    }
+
+    const bool removed = m_onlineUsers.removeAll(trimmedUsername) > 0;
+    if (removed) {
+        syncUserListDisplay();
+    }
+
+    if (m_hasAuthenticatedSession && trimmedUsername != m_currentUsername) {
+        m_messagingWindow->displayNotification(trimmedUsername + " a quitte le chat.");
+    }
 }
 
 void MainWindow::onMessageReceived(const Message &message)
@@ -163,4 +216,12 @@ void MainWindow::performWizzAnimation()
     m_wizzAnimation = group;
     connect(m_wizzAnimation, &QAbstractAnimation::finished, m_wizzAnimation, &QObject::deleteLater);
     m_wizzAnimation->start();
+}
+
+void MainWindow::syncUserListDisplay()
+{
+    QStringList sortedUsers = m_onlineUsers;
+    sortedUsers.removeDuplicates();
+    sortedUsers.sort(Qt::CaseInsensitive);
+    m_messagingWindow->updateUserList(sortedUsers);
 }

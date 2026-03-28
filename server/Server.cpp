@@ -129,6 +129,7 @@ void Server::handleLogin(QTcpSocket *socket, const Message &msg)
     m_clients[socket] = username;
     m_usernameToSocket[username] = socket;
     m_pendingLogins.remove(socket);
+    m_db.setUserOnline(username, true);
 
     // Send success response
     Message response(MessageType::LoginResponse, "success");
@@ -223,4 +224,3 @@ bool Server::readMessageFromBuffer(QTcpSocket* socket)
     m_messageHandler->processData(socket, messageData);
     return true; // Successfully processed a message
 }
-

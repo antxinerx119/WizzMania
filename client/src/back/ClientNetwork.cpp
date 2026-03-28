@@ -79,6 +79,7 @@ void ClientNetwork::onDisconnected()
 {
     qDebug() << "Disconnected from server";
     m_loggedIn = false;
+    m_buffer.clear();
     emit disconnected();
 }
 
@@ -139,16 +140,20 @@ void ClientNetwork::processData(const QByteArray &data)
 
     switch (msg.type()) {
     case MessageType::LoginResponse:
-        // Handle login response
         if (msg.content() == "success") {
             m_loggedIn = true;
             emit loginSuccess(m_username);
         } else if (!m_loggedIn) {
             emit loginFailed(msg.content());
         } else {
-            // It's the user list being sent immediately after success
-            qDebug() << "Received user list:" << msg.content();
-            // Optional: emit userListReceived(msg.content().split(","));
+            QStringList users;
+            if (!msg.content().trimmed().isEmpty()) {
+                users = msg.content().split(",", Qt::SkipEmptyParts);
+                for (QString &user : users) {
+                    user = user.trimmed();
+                }
+            }
+            emit userListReceived(users);
         }
         break;
 
@@ -158,11 +163,11 @@ void ClientNetwork::processData(const QByteArray &data)
         break;
 
     case MessageType::UserJoin:
-        emit userJoined(msg.sender());
+        emit userJoined(msg.content().isEmpty() ? msg.sender() : msg.content());
         break;
 
     case MessageType::UserLeave:
-        emit userLeft(msg.sender());
+        emit userLeft(msg.content().isEmpty() ? msg.sender() : msg.content());
         break;
 
     case MessageType::Wizz:

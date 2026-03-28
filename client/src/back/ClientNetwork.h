@@ -2,6 +2,7 @@
 #define CLIENTNETWORK_H
 
 #include <QObject>
+#include <QStringList>
 #include <QTcpSocket>
 #include <QHostAddress>
 #include "Message.h"
@@ -31,6 +32,7 @@ signals:
     void disconnected();
     void loginSuccess(const QString &username);
     void loginFailed(const QString &error);
+    void userListReceived(const QStringList &users);
     void messageReceived(const Message &message);
     void userJoined(const QString &username);
     void userLeft(const QString &username);
