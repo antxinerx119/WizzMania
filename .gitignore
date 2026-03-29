@@ -1,6 +1,8 @@
 # Build output
 build/
 build_local/
+build-local/
+build-*/
 cmake-build-*/
 
 # CMake generated files
@@ -30,3 +32,6 @@ ui_*.h
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Local-only notes
+docs/CURRENT_FEATURES.md

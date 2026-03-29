@@ -3,7 +3,7 @@
 ## 🎯 Avant de Commencer
 
 1. Lire cette documentation complètement
-2. Consulter [BUGFIX_AND_TODO.md](BUGFIX_AND_TODO.md) pour les tâches prioritaires
+2. Consulter `README.md` et `docs/` pour l'etat actuel du projet
 3. S'assurer que l'environnement de développement est configuré (Qt6, CMake)
 4. Créer une branche pour votre travail
 
@@ -312,10 +312,8 @@ TEST_F(MyClassTest, ErrorHandling) {
 ```bash
 cd build
 cmake --build . --config Debug
+ctest --output-on-failure
 ./TestMessage          # Message serialization
-./TestServer           # Server tests
-./TestClientNetwork    # Client network tests
-# ... autres tests
 ```
 
 ### Coverage (optionnel)

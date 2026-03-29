@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
+    bool passed = false;
 
     // Create a test message
     Message original(MessageType::ChatMessage, "Hello, world!");
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
             deserialized->content() == original.content() &&
             deserialized->sender() == original.sender()) {
             qDebug() << "Test PASSED: Serialization/Deserialization successful";
+            passed = true;
         } else {
             qDebug() << "Test FAILED: Data mismatch";
         }
@@ -32,5 +34,5 @@ int main(int argc, char *argv[]) {
         qDebug() << "Test FAILED: Deserialization failed";
     }
 
-    return 0;
+    return passed ? 0 : 1;
 }

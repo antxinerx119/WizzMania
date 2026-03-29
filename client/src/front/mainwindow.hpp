@@ -2,15 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPropertyAnimation>
 #include <QStringList>
 #include "../back/ClientNetwork.hpp"
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
 
 class QStackedWidget;
 class LoginWindow;
@@ -20,14 +13,10 @@ class MessageWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Q_PROPERTY(QPoint wizzOffset READ wizzOffset WRITE setWizzOffset)
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-    QPoint wizzOffset() const { return m_wizzOffset; }
-    void setWizzOffset(const QPoint &offset);
 
 private slots:
     void onLoginRequested(const QString &username, const QString &password, const QString &host, quint16 port);
@@ -42,24 +31,19 @@ private slots:
     void onUserJoined(const QString &username);
     void onUserLeft(const QString &username);
     void onMessageReceived(const Message &message);
-    void onWizzReceived(const QString &fromUsername);
     void onNetworkError(const QString &errorMessage);
-    void performWizzAnimation();
 
 private:
     void startAuthentication(const QString &username, const QString &password, const QString &host, quint16 port, bool registrationFlow);
     void setAuthenticationUiBusy(bool busy);
     void syncUserListDisplay();
 
-    Ui::MainWindow *ui;
     ClientNetwork *m_network;
     QString m_currentUsername;
     QString m_currentPassword;
     QString m_serverHost;
     quint16 m_serverPort;
     QStringList m_onlineUsers;
-    QPoint m_wizzOffset;
-    QAbstractAnimation *m_wizzAnimation;
     QStackedWidget *m_stack;
     LoginWindow *m_loginWindow;
     RegisterWindow *m_registerWindow;

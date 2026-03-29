@@ -68,17 +68,6 @@ void ClientNetwork::sendChatMessage(const QString &content)
     sendMessage(msg);
 }
 
-void ClientNetwork::sendWizz(const QString &targetUsername)
-{
-    if (!m_loggedIn) {
-        emit error("Tu dois etre connecte avant d'envoyer un Wizz.");
-        return;
-    }
-    Message msg(MessageType::Wizz, targetUsername);
-    msg.setSender(m_username);
-    sendMessage(msg);
-}
-
 bool ClientNetwork::isConnected() const
 {
     return m_socket->state() == QAbstractSocket::ConnectedState;
@@ -188,10 +177,6 @@ void ClientNetwork::processData(const QByteArray &data)
 
     case MessageType::UserLeave:
         emit userLeft(msg.content().isEmpty() ? msg.sender() : msg.content());
-        break;
-
-    case MessageType::Wizz:
-        emit wizzReceived(msg.sender());
         break;
 
     default:

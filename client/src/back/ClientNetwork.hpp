@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QStringList>
 #include <QTcpSocket>
-#include <QHostAddress>
 #include "Message.hpp"
 #include "Protocol.hpp"
 
@@ -22,7 +21,6 @@ public:
     void sendMessage(const Message &message);
     void sendLogin(const QString &username, const QString &password = "");
     void sendChatMessage(const QString &content);
-    void sendWizz(const QString &targetUsername = "");
 
     bool isConnected() const;
     bool isConnectionInProgress() const;
@@ -37,7 +35,6 @@ signals:
     void messageReceived(const Message &message);
     void userJoined(const QString &username);
     void userLeft(const QString &username);
-    void wizzReceived(const QString &fromUsername);
     void error(const QString &errorMessage);
 
 private slots:

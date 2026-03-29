@@ -5,18 +5,13 @@
 #include "Message.hpp"
 
 #include <QMessageBox>
-#include <QPropertyAnimation>
-#include <QSequentialAnimationGroup>
 #include <QStackedWidget>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(nullptr)
     , m_network(new ClientNetwork(this))
     , m_serverHost("127.0.0.1")
     , m_serverPort(12345)
-    , m_wizzOffset(0, 0)
-    , m_wizzAnimation(nullptr)
     , m_stack(new QStackedWidget)
     , m_loginWindow(new LoginWindow)
     , m_registerWindow(new RegisterWindow)
@@ -45,7 +40,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_network, &ClientNetwork::userJoined, this, &MainWindow::onUserJoined);
     connect(m_network, &ClientNetwork::userLeft, this, &MainWindow::onUserLeft);
     connect(m_network, &ClientNetwork::messageReceived, this, &MainWindow::onMessageReceived);
-    connect(m_network, &ClientNetwork::wizzReceived, this, &MainWindow::onWizzReceived);
     connect(m_network, &ClientNetwork::error, this, &MainWindow::onNetworkError);
 
     connect(m_messagingWindow, &MessageWindow::messageSent, this, [this](const QString &text) {
@@ -214,47 +208,10 @@ void MainWindow::onMessageReceived(const Message &message)
     m_messagingWindow->displayMessage(message.sender(), message.content());
 }
 
-void MainWindow::onWizzReceived(const QString &fromUsername)
-{
-    m_messagingWindow->displayNotification(fromUsername + " vous a envoye un Wizz!");
-    performWizzAnimation();
-}
-
 void MainWindow::onNetworkError(const QString &errorMessage)
 {
     setAuthenticationUiBusy(false);
     QMessageBox::critical(this, m_hasAuthenticatedSession ? "Erreur reseau" : "Connexion impossible", errorMessage);
-}
-
-void MainWindow::setWizzOffset(const QPoint &offset)
-{
-    m_wizzOffset = offset;
-    move(pos() + offset);
-}
-
-void MainWindow::performWizzAnimation()
-{
-    if (m_wizzAnimation) {
-        delete m_wizzAnimation;
-    }
-
-    auto *group = new QSequentialAnimationGroup(this);
-
-    for (int i = 0; i < 5; ++i) {
-        auto *anim = new QPropertyAnimation(this, "wizzOffset", this);
-        anim->setDuration(50);
-        anim->setEndValue(i % 2 == 0 ? QPoint(-10, 0) : QPoint(10, 0));
-        group->addAnimation(anim);
-    }
-
-    auto *finalAnim = new QPropertyAnimation(this, "wizzOffset", this);
-    finalAnim->setDuration(50);
-    finalAnim->setEndValue(QPoint(0, 0));
-    group->addAnimation(finalAnim);
-
-    m_wizzAnimation = group;
-    connect(m_wizzAnimation, &QAbstractAnimation::finished, m_wizzAnimation, &QObject::deleteLater);
-    m_wizzAnimation->start();
 }
 
 void MainWindow::syncUserListDisplay()

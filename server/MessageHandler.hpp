@@ -17,7 +17,6 @@ public:
 
 private:
     void handleChatMessage(QTcpSocket *socket, const Message &msg);
-    void handleWizz(QTcpSocket *socket, const Message &msg);
 
     Server *m_server;
 };

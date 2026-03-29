@@ -25,11 +25,7 @@ void MessageHandler::processData(QTcpSocket *socket, const QByteArray &data)
     case MessageType::ChatMessage:
         handleChatMessage(socket, msg);
         break;
-        
-    case MessageType::Wizz:
-        handleWizz(socket, msg);
-        break;
-        
+
     default:
         qDebug() << "Unknown message type:" << static_cast<int>(msg.type());
     }
@@ -58,30 +54,4 @@ void MessageHandler::handleChatMessage(QTcpSocket *socket, const Message &msg)
 
     qDebug() << "Message from" << username << ":" << content;
     emit m_server->messageReceived(username, content);
-}
-
-void MessageHandler::handleWizz(QTcpSocket *socket, const Message &msg)
-{
-    QString username = m_server->m_clients.value(socket);
-    if (username.isEmpty()) {
-        return;
-    }
-
-    QString target = msg.content();
-    
-    Message wizzMsg(MessageType::Wizz);
-    wizzMsg.setSender(username);
-
-    if (target.isEmpty()) {
-        // Wizz everyone
-        m_server->broadcast(wizzMsg, socket);
-        qDebug() << "Wizz from" << username << "to everyone";
-    } else {
-        // Wizz specific user
-        QTcpSocket *targetSocket = m_server->m_usernameToSocket.value(target);
-        if (targetSocket) {
-            m_server->sendToClient(targetSocket, wizzMsg);
-            qDebug() << "Wizz from" << username << "to" << target;
-        }
-    }
 }

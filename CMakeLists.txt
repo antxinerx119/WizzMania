@@ -39,7 +39,6 @@ qt_standard_project_setup()
 # ---------------------------------------------------------------------------
 set(COMMON_SOURCES
     src/common/Protocol.hpp
-    src/common/Protocol.cpp
     src/common/Message.hpp
     src/common/Message.cpp
 )
@@ -82,7 +81,6 @@ set(CLIENT_SOURCES
     client/main_client.cpp
     client/src/front/mainwindow.cpp
     client/src/front/mainwindow.hpp
-    client/src/front/mainwindow.ui
     client/src/front/messagewindow.hpp
     client/src/front/messagewindow.cpp
     client/src/front/loginwindow.hpp
@@ -127,3 +125,5 @@ target_include_directories(TestMessage PRIVATE
 )
 
 target_link_libraries(TestMessage PRIVATE Qt6::Core)
+
+add_test(NAME TestMessage COMMAND TestMessage)

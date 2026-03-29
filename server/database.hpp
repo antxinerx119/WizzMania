@@ -73,17 +73,6 @@ public:
         return false;
     }
 
-    int getUserId(const QString& username) {
-        QSqlQuery query;
-        query.prepare("SELECT id FROM users WHERE username = :username");
-        query.bindValue(":username", username);
-
-        if (query.exec() && query.next()) {
-            return query.value(0).toInt();
-        }
-        return -1;
-    }
-
     bool setUserOnline(const QString& username, bool online) {
         QSqlQuery query;
         query.prepare("UPDATE users SET is_online = :online WHERE username = :username");
@@ -95,17 +84,6 @@ public:
             return false;
         }
         return true;
-    }
-
-    bool isUserOnline(const QString& username) {
-        QSqlQuery query;
-        query.prepare("SELECT is_online FROM users WHERE username = :username");
-        query.bindValue(":username", username);
-
-        if (query.exec() && query.next()) {
-            return query.value(0).toBool();
-        }
-        return false;
     }
 
 private:
