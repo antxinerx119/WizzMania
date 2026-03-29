@@ -116,6 +116,7 @@ void MainWindow::startAuthentication(const QString &username, const QString &pas
     m_registrationInProgress = registrationFlow;
     m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
     m_registerWindow->setServerEndpoint(m_serverHost, m_serverPort);
+    setAuthenticationUiBusy(true);
     m_network->connectToServer(m_serverHost, m_serverPort);
 }
 
@@ -130,6 +131,7 @@ void MainWindow::onDisconnected()
     const bool showDisconnectWarning = m_hasAuthenticatedSession;
     m_hasAuthenticatedSession = false;
     m_registrationInProgress = false;
+    setAuthenticationUiBusy(false);
     m_onlineUsers.clear();
     syncUserListDisplay();
     m_loginWindow->setServerEndpoint(m_serverHost, m_serverPort);
@@ -137,7 +139,7 @@ void MainWindow::onDisconnected()
     m_stack->setCurrentIndex(0);
 
     if (showDisconnectWarning) {
-        QMessageBox::warning(this, "Disconnected", "You have been disconnected from the server.");
+        QMessageBox::warning(this, "Connexion interrompue", "La connexion au serveur a ete interrompue.");
     }
 }
 
@@ -145,6 +147,7 @@ void MainWindow::onLoginSuccess(const QString &username)
 {
     m_hasAuthenticatedSession = true;
     m_registrationInProgress = false;
+    setAuthenticationUiBusy(false);
     m_stack->setCurrentIndex(2);
     m_messagingWindow->setUsername(username);
 
@@ -156,6 +159,7 @@ void MainWindow::onLoginSuccess(const QString &username)
 
 void MainWindow::onLoginFailed(const QString &error)
 {
+    setAuthenticationUiBusy(false);
     QMessageBox::warning(this, m_registrationInProgress ? "Inscription impossible" : "Connexion impossible", error);
     m_hasAuthenticatedSession = false;
     m_registrationInProgress = false;
@@ -218,7 +222,8 @@ void MainWindow::onWizzReceived(const QString &fromUsername)
 
 void MainWindow::onNetworkError(const QString &errorMessage)
 {
-    QMessageBox::critical(this, "Network Error", errorMessage);
+    setAuthenticationUiBusy(false);
+    QMessageBox::critical(this, m_hasAuthenticatedSession ? "Erreur reseau" : "Connexion impossible", errorMessage);
 }
 
 void MainWindow::setWizzOffset(const QPoint &offset)
@@ -258,4 +263,10 @@ void MainWindow::syncUserListDisplay()
     sortedUsers.removeDuplicates();
     sortedUsers.sort(Qt::CaseInsensitive);
     m_messagingWindow->updateUserList(sortedUsers);
+}
+
+void MainWindow::setAuthenticationUiBusy(bool busy)
+{
+    m_loginWindow->setBusy(busy);
+    m_registerWindow->setBusy(busy);
 }

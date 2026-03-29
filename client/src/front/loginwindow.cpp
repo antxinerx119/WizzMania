@@ -8,6 +8,7 @@
 
 LoginWindow::LoginWindow(QWidget *parent)
     : QWidget{parent}
+    , m_busy(false)
 {
     serverHostInput = new QLineEdit;
     serverHostInput->setPlaceholderText("Adresse du serveur");
@@ -47,8 +48,25 @@ void LoginWindow::setServerEndpoint(const QString &host, quint16 port)
     serverPortInput->setText(QString::number(port));
 }
 
+void LoginWindow::setBusy(bool busy)
+{
+    m_busy = busy;
+
+    serverHostInput->setEnabled(!busy);
+    serverPortInput->setEnabled(!busy);
+    usernameInput->setEnabled(!busy);
+    passwordInput->setEnabled(!busy);
+    loginButton->setEnabled(!busy);
+    registerButton->setEnabled(!busy);
+    loginButton->setText(busy ? "Connexion..." : "Se connecter");
+}
+
 void LoginWindow::submitLogin()
 {
+    if (m_busy) {
+        return;
+    }
+
     QString host;
     quint16 port = 0;
     if (!parseEndpoint(host, port)) {
@@ -60,6 +78,10 @@ void LoginWindow::submitLogin()
 
 void LoginWindow::openRegistration()
 {
+    if (m_busy) {
+        return;
+    }
+
     QString host;
     quint16 port = 0;
     if (!parseEndpoint(host, port)) {

@@ -48,6 +48,7 @@ private slots:
 
 private:
     void startAuthentication(const QString &username, const QString &password, const QString &host, quint16 port, bool registrationFlow);
+    void setAuthenticationUiBusy(bool busy);
     void syncUserListDisplay();
 
     Ui::MainWindow *ui;

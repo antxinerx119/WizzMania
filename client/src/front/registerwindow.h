@@ -14,6 +14,7 @@ public:
     explicit RegisterWindow(QWidget *parent = nullptr);
 
     void setServerEndpoint(const QString &host, quint16 port);
+    void setBusy(bool busy);
 
 signals:
     void registerRequested(QString username, QString password, QString host, quint16 port);
@@ -33,6 +34,7 @@ private:
     QLineEdit *confirmPasswordInput;
     QPushButton *registerButton;
     QPushButton *backButton;
+    bool m_busy;
 };
 
 #endif // REGISTERWINDOW_H

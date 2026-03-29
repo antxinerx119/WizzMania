@@ -4,6 +4,7 @@
 ClientNetwork::ClientNetwork(QObject *parent)
     : QObject(parent)
     , m_socket(new QTcpSocket(this))
+    , m_lastPort(0)
     , m_loggedIn(false)
 {
     connect(m_socket, &QTcpSocket::connected, this, &ClientNetwork::onConnected);
@@ -19,6 +20,20 @@ ClientNetwork::~ClientNetwork()
 
 void ClientNetwork::connectToServer(const QString &host, quint16 port)
 {
+    if (m_socket->state() == QAbstractSocket::ConnectingState || m_socket->state() == QAbstractSocket::HostLookupState) {
+        emit error("Une tentative de connexion est deja en cours. Patiente quelques secondes avant de reessayer.");
+        return;
+    }
+
+    if (m_socket->state() == QAbstractSocket::ConnectedState) {
+        emit error("Le client est deja connecte a un serveur. Deconnecte-toi avant de changer de serveur.");
+        return;
+    }
+
+    m_lastHost = host.trimmed();
+    m_lastPort = port;
+    m_buffer.clear();
+    m_loggedIn = false;
     m_socket->connectToHost(host, port);
 }
 
@@ -45,7 +60,7 @@ void ClientNetwork::sendLogin(const QString &username, const QString &password)
 void ClientNetwork::sendChatMessage(const QString &content)
 {
     if (!m_loggedIn) {
-        emit error("Not logged in");
+        emit error("Tu dois etre connecte avant d'envoyer un message.");
         return;
     }
     Message msg(MessageType::ChatMessage, content);
@@ -56,7 +71,7 @@ void ClientNetwork::sendChatMessage(const QString &content)
 void ClientNetwork::sendWizz(const QString &targetUsername)
 {
     if (!m_loggedIn) {
-        emit error("Not logged in");
+        emit error("Tu dois etre connecte avant d'envoyer un Wizz.");
         return;
     }
     Message msg(MessageType::Wizz, targetUsername);
@@ -67,6 +82,11 @@ void ClientNetwork::sendWizz(const QString &targetUsername)
 bool ClientNetwork::isConnected() const
 {
     return m_socket->state() == QAbstractSocket::ConnectedState;
+}
+
+bool ClientNetwork::isConnectionInProgress() const
+{
+    return m_socket->state() == QAbstractSocket::ConnectingState || m_socket->state() == QAbstractSocket::HostLookupState;
 }
 
 void ClientNetwork::onConnected()
@@ -97,7 +117,7 @@ void ClientNetwork::onReadyRead()
 void ClientNetwork::onError(QAbstractSocket::SocketError socketError)
 {
     qDebug() << "Socket error:" << socketError;
-    emit error(m_socket->errorString());
+    emit error(friendlySocketError(socketError));
 }
 
 bool ClientNetwork::readMessage(QByteArray &buffer)
@@ -177,4 +197,56 @@ void ClientNetwork::processData(const QByteArray &data)
     default:
         qDebug() << "Unknown message type:" << static_cast<int>(msg.type());
     }
+}
+
+QString ClientNetwork::friendlySocketError(QAbstractSocket::SocketError socketError) const
+{
+    switch (socketError) {
+    case QAbstractSocket::ConnectionRefusedError:
+        return "Connexion refusee par le serveur " + endpointDescription() + ". Verifie que WizzServer est lance et que le port est autorise dans le pare-feu.";
+    case QAbstractSocket::RemoteHostClosedError:
+        return m_loggedIn
+            ? "Le serveur a ferme la connexion."
+            : "Le serveur a coupe la connexion avant la fin de l'authentification.";
+    case QAbstractSocket::HostNotFoundError:
+        return "Serveur introuvable. Verifie l'adresse " + m_lastHost + ".";
+    case QAbstractSocket::SocketAccessError:
+        return "La connexion reseau a ete bloquee par Windows ou par le pare-feu.";
+    case QAbstractSocket::SocketResourceError:
+        return "Le client n'a pas pu reserver les ressources reseau necessaires.";
+    case QAbstractSocket::NetworkError:
+        return "Impossible d'atteindre le serveur " + endpointDescription() + ". Verifie que les deux PC sont sur le meme reseau.";
+    case QAbstractSocket::AddressInUseError:
+        return "Le port reseau utilise par le client est deja occupe localement.";
+    case QAbstractSocket::SocketAddressNotAvailableError:
+        return "L'adresse reseau locale n'est pas disponible sur ce PC.";
+    case QAbstractSocket::UnsupportedSocketOperationError:
+        return "Cette operation reseau n'est pas prise en charge sur ce systeme.";
+    case QAbstractSocket::OperationError:
+        return "Une autre operation reseau est deja en cours. Attends quelques secondes puis reessaie.";
+    case QAbstractSocket::SslHandshakeFailedError:
+        return "La negociation securisee a echoue.";
+    case QAbstractSocket::TemporaryError:
+        return "Erreur reseau temporaire. Reessaie dans quelques secondes.";
+    case QAbstractSocket::UnknownSocketError:
+        break;
+    default:
+        break;
+    }
+
+    const QString rawError = m_socket->errorString().trimmed();
+    if (rawError.isEmpty()) {
+        return "Erreur reseau inconnue pendant la connexion au serveur " + endpointDescription() + ".";
+    }
+
+    return "Erreur reseau avec le serveur " + endpointDescription() + " : " + rawError;
+}
+
+QString ClientNetwork::endpointDescription() const
+{
+    if (m_lastHost.isEmpty() || m_lastPort == 0) {
+        return "selectionne";
+    }
+
+    return m_lastHost + ":" + QString::number(m_lastPort);
 }

@@ -14,6 +14,7 @@ public:
     explicit LoginWindow(QWidget *parent = nullptr);
 
     void setServerEndpoint(const QString &host, quint16 port);
+    void setBusy(bool busy);
 
 signals:
     void loginRequested(QString username, QString password, QString host, quint16 port);
@@ -32,6 +33,7 @@ private:
     QLineEdit *passwordInput;
     QPushButton *loginButton;
     QPushButton *registerButton;
+    bool m_busy;
 };
 
 #endif // LOGINWINDOW_H

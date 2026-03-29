@@ -25,6 +25,7 @@ public:
     void sendWizz(const QString &targetUsername = "");
 
     bool isConnected() const;
+    bool isConnectionInProgress() const;
     QString username() const { return m_username; }
 
 signals:
@@ -46,11 +47,15 @@ private slots:
     void onError(QAbstractSocket::SocketError socketError);
 
 private:
+    QString friendlySocketError(QAbstractSocket::SocketError socketError) const;
+    QString endpointDescription() const;
     void processData(const QByteArray &data);
     bool readMessage(QByteArray &buffer);
 
     QTcpSocket *m_socket;
     QString m_username;
+    QString m_lastHost;
+    quint16 m_lastPort;
     QByteArray m_buffer;
     bool m_loggedIn;
 };

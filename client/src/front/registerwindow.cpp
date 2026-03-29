@@ -9,6 +9,7 @@
 
 RegisterWindow::RegisterWindow(QWidget *parent)
     : QWidget{parent}
+    , m_busy(false)
 {
     auto *titleLabel = new QLabel("Creer un compte");
 
@@ -56,8 +57,26 @@ void RegisterWindow::setServerEndpoint(const QString &host, quint16 port)
     serverPortInput->setText(QString::number(port));
 }
 
+void RegisterWindow::setBusy(bool busy)
+{
+    m_busy = busy;
+
+    serverHostInput->setEnabled(!busy);
+    serverPortInput->setEnabled(!busy);
+    usernameInput->setEnabled(!busy);
+    passwordInput->setEnabled(!busy);
+    confirmPasswordInput->setEnabled(!busy);
+    registerButton->setEnabled(!busy);
+    backButton->setEnabled(!busy);
+    registerButton->setText(busy ? "Connexion..." : "Creer le compte");
+}
+
 void RegisterWindow::submitRegistration()
 {
+    if (m_busy) {
+        return;
+    }
+
     QString host;
     quint16 port = 0;
     if (!parseEndpoint(host, port)) {
@@ -88,6 +107,10 @@ void RegisterWindow::submitRegistration()
 
 void RegisterWindow::goBack()
 {
+    if (m_busy) {
+        return;
+    }
+
     QString host;
     quint16 port = 0;
     if (!parseEndpoint(host, port)) {
