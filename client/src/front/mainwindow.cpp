@@ -1,8 +1,8 @@
-#include "mainwindow.h"
-#include "loginwindow.h"
-#include "messagewindow.h"
-#include "registerwindow.h"
-#include "Message.h"
+#include "mainwindow.hpp"
+#include "loginwindow.hpp"
+#include "messagewindow.hpp"
+#include "registerwindow.hpp"
+#include "Message.hpp"
 
 #include <QMessageBox>
 #include <QPropertyAnimation>

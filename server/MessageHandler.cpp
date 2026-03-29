@@ -1,6 +1,6 @@
-#include "MessageHandler.h"
-#include "Server.h"
-#include "Message.h"
+#include "MessageHandler.hpp"
+#include "Server.hpp"
+#include "Message.hpp"
 #include <QDebug>
 
 MessageHandler::MessageHandler(Server *server)

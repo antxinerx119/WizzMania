@@ -5,8 +5,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 #include <QHostAddress>
-#include "Message.h"
-#include "Protocol.h"
+#include "Message.hpp"
+#include "Protocol.hpp"
 
 class ClientNetwork : public QObject
 {

@@ -1,4 +1,4 @@
-#include "registerwindow.h"
+#include "registerwindow.hpp"
 
 #include <QIntValidator>
 #include <QLabel>

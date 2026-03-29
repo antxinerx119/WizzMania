@@ -1,4 +1,4 @@
-#include "client/src/front/mainwindow.h"
+#include "client/src/front/mainwindow.hpp"
 #include <QApplication>
 
 int main(int argc, char *argv[])

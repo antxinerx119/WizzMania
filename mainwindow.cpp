@@ -1,7 +1,7 @@
-#include "mainwindow.h"
-#include "loginwindow.h"
-#include "messagewindow.h"
-#include "registerwindow.h"
+#include "mainwindow.hpp"
+#include "loginwindow.hpp"
+#include "messagewindow.hpp"
+#include "registerwindow.hpp"
 
 #include <QStackedWidget>
 

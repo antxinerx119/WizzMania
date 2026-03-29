@@ -38,9 +38,9 @@ qt_standard_project_setup()
 # Shared sources (common protocol, used by both server and client)
 # ---------------------------------------------------------------------------
 set(COMMON_SOURCES
-    src/common/Protocol.h
+    src/common/Protocol.hpp
     src/common/Protocol.cpp
-    src/common/Message.h
+    src/common/Message.hpp
     src/common/Message.cpp
 )
 
@@ -49,7 +49,7 @@ set(COMMON_SOURCES
 # ---------------------------------------------------------------------------
 set(SERVER_SOURCES
     server/main_server.cpp
-    server/Server.h
+    server/Server.hpp
     server/Server.cpp
     server/MessageHandler.cpp
     server/database.hpp
@@ -81,15 +81,15 @@ qt_finalize_executable(WizzServer)
 set(CLIENT_SOURCES
     client/main_client.cpp
     client/src/front/mainwindow.cpp
-    client/src/front/mainwindow.h
+    client/src/front/mainwindow.hpp
     client/src/front/mainwindow.ui
-    client/src/front/messagewindow.h
+    client/src/front/messagewindow.hpp
     client/src/front/messagewindow.cpp
-    client/src/front/loginwindow.h
+    client/src/front/loginwindow.hpp
     client/src/front/loginwindow.cpp
-    client/src/front/registerwindow.h
+    client/src/front/registerwindow.hpp
     client/src/front/registerwindow.cpp
-    client/src/back/ClientNetwork.h
+    client/src/back/ClientNetwork.hpp
     client/src/back/ClientNetwork.cpp
 )
 

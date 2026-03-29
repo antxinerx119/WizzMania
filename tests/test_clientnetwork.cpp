@@ -3,9 +3,9 @@
 #include <QTest>
 #include <QSignalSpy>
 #include <QThread>
-#include "client/src/back/ClientNetwork.h"
-#include "server/Server.h"
-#include "src/common/Message.h"
+#include "client/src/back/ClientNetwork.hpp"
+#include "server/Server.hpp"
+#include "src/common/Message.hpp"
 
 // Helper: Server in background thread
 class ServerThread : public QThread {

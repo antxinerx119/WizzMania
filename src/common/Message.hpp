@@ -3,7 +3,7 @@
 
 #include <QtCore>
 #include <optional>
-#include "Protocol.h"
+#include "Protocol.hpp"
 
 class Message {
 public:

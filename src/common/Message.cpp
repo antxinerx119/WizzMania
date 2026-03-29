@@ -1,4 +1,4 @@
-#include "Message.h"
+#include "Message.hpp"
 #include <QDataStream>
 
 Message::Message() : m_type(MessageType::ChatMessage) {}

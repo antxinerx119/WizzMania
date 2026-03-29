@@ -1,4 +1,4 @@
-#include "messagewindow.h"
+#include "messagewindow.hpp"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>

@@ -1,4 +1,4 @@
-#include "loginwindow.h"
+#include "loginwindow.hpp"
 
 #include <QIntValidator>
 #include <QLineEdit>

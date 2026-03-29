@@ -1,4 +1,4 @@
-#include "ClientNetwork.h"
+#include "ClientNetwork.hpp"
 #include <QDebug>
 
 ClientNetwork::ClientNetwork(QObject *parent)

@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include "../src/common/Message.h"
+#include "../src/common/Message.hpp"
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);

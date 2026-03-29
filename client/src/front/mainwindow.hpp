@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QPropertyAnimation>
 #include <QStringList>
-#include "../back/ClientNetwork.h"
+#include "../back/ClientNetwork.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

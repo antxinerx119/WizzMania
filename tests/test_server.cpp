@@ -4,8 +4,8 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QThread>
-#include "server/Server.h"
-#include "src/common/Message.h"
+#include "server/Server.hpp"
+#include "src/common/Message.hpp"
 
 // Helper class to run Server in a background thread
 class ServerThread : public QThread {
